@@ -65,7 +65,7 @@ class ScatterUI(QtWidgets.QDialog):
         """Save the Scene"""
         """self._set_scenefile_properties_from_ui()
         self.scenefile.save()"""
-        self.scenefile.scattertest()
+        self.scatterscene.scattertest()
 
     def _set_scenefile_properties_from_ui(self):
         self.scenefile.folder_path = self.folder_le.text()
@@ -154,12 +154,19 @@ class ScatterUI(QtWidgets.QDialog):
         return layout
 
     def _create_objrotation_ui(self):
-        self.RandomRotation = QtWidgets.QSpinBox()
-        self.RandomRotation.setValue(self.scatterscene.rotationNumber)
-        self.RandomRotation.setFixedWidth(400)
+        """min settings"""
+        self.RandomRotationmin = QtWidgets.QDoubleSpinBox()
+        self.RandomRotationmin.setValue(self.scatterscene.rotationNumbermin)
+        self.RandomRotationmin.setFixedWidth(100)
+        """max settings"""
+        self.RandomRotationmax = QtWidgets.QDoubleSpinBox()
+        self.RandomRotationmax.setValue(self.scatterscene.rotationNumbermax)
+        self.RandomRotationmax.setFixedWidth(100)
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(QtWidgets.QLabel("Random Rotation(only numbers):"), 0, 0)
-        layout.addWidget(self.RandomRotation, 0, 1)
+        layout.addWidget(QtWidgets.QLabel("Random Rotation Min(only numbers):"), 0, 0)
+        layout.addWidget(self.RandomRotationmin, 0, 1)
+        layout.addWidget(QtWidgets.QLabel("Random Rotation Max(only numbers):"), 0, 2)
+        layout.addWidget(self.RandomRotationmax, 0, 3)
         return layout
 
 
@@ -259,24 +266,29 @@ class ScatterScene:
         self.scalenumbermin = .1
         self.scalenumbermax = .2
         self.scalerandomnumber = .5
-        self.rotationNumber = 3
+        self.rotationNumbermin = 3
+        self.rotationNumbermax = 5
+
 
     def scattertest(self):
         """verts = cmds.ls("pPlane1.vtx[*]", flatten=True)"""
         print(self.verts)
         self.scatter()
 
-    def scatter(self, scatter_obj='pSphere1', align=True):
+    def scatter(self, scatter_obj='pCube1', align=True):
         for point in self.verts:
             print(point)
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
+            scatter_instance = cmds.instance(scatter_obj, name="scat_inst"+point)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
-            cmds.scale(self.scalerandomnumber, self.scalerandomnumber,self.scalerandomnumber,scatter_instance, absolute=True)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber,self.scalerandomnumber, scatter_instance, absolute=True)
+            self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             if align:
                 const = cmds.normalConstraint([point], scatter_instance)
                 cmds.delete(const)
+            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+                        relative=True, componentSpace=True)
 
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")"""
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")
