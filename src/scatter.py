@@ -26,6 +26,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
         self.scenefile = SceneFile()
+        self.scatterscene = ScatterScene()
         self.create_ui()
         self.create_connections()
 
@@ -71,14 +72,14 @@ class ScatterUI(QtWidgets.QDialog):
         self.scenefile.ver = self.ver_sbx.value()
         self.scenefile.ext = self.ext_lbl.text()
 
-    @QtCore.Slot()
+    """@QtCore.Slot()
     def _browse_folder(self):
-        """Opens a dialogue box to browse the folder"""
+        Opens a dialogue box to browse the folder
         folder = QtWidgets.QFileDialog.getExistingDirectory(
             parent=self, caption="Select Folder", dir=self.folder_le.text(),
             options=QtWidgets.QFileDialog.ShowDirsOnly |
                     QtWidgets.QFileDialog.DontResolveSymlinks)
-        self.folder_le.setText(folder)
+        self.folder_le.setText(folder)"""
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
@@ -134,17 +135,22 @@ class ScatterUI(QtWidgets.QDialog):
         return layout
 
     def _create_objscaler_ui(self):
-        self.RandomScale = QtWidgets.QLineEdit("1")
+        self.RandomScale = QtWidgets.QSpinBox()
+        self.RandomScale.setValue(self.scatterscene.scalenumber)
+        self.RandomScale.setFixedWidth(400)
+        """self.RandomScale = QtWidgets.setValue(self.scatterscene.scalenumber)"""
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Scale(only numbers):"), 0, 0)
-        layout.addWidget(self.RandomScale, 0, 0)
+        layout.addWidget(self.RandomScale, 0, 1)
         return layout
 
     def _create_objrotation_ui(self):
-        self.RandomRotation = QtWidgets.QLineEdit("1")
+        self.RandomRotation = QtWidgets.QSpinBox()
+        self.RandomRotation.setValue(self.scatterscene.rotationNumber)
+        self.RandomRotation.setFixedWidth(400)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Rotation(only numbers):"), 0, 0)
-        layout.addWidget(self.RandomRotation, 0, 0)
+        layout.addWidget(self.RandomRotation, 0, 1)
         return layout
 
 
@@ -241,6 +247,8 @@ class SceneFile(object):
 class ScatterScene:
     def __init__(self):
         self.verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+        self.scalenumber = 2
+        self.rotationNumber = 3
 
     def scattertest(self):
         """verts = cmds.ls("pPlane1.vtx[*]", flatten=True)"""
