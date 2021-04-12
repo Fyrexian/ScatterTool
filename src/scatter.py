@@ -1,3 +1,5 @@
+import random
+
 from pymel.core.system import Path
 import pymel.core as pmc
 import logging
@@ -254,8 +256,9 @@ class SceneFile(object):
 class ScatterScene:
     def __init__(self):
         self.verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
-        self.scalenumbermin = .5
-        self.scalenumbermax = 5
+        self.scalenumbermin = .1
+        self.scalenumbermax = .2
+        self.scalerandomnumber = .5
         self.rotationNumber = 3
 
     def scattertest(self):
@@ -269,7 +272,8 @@ class ScatterScene:
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
             scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
-            cmds.scale(self.scalenumbermin,self.scalenumbermin,self.scalenumbermin,scatter_instance, absolute=True)
+            self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber,self.scalerandomnumber,scatter_instance, absolute=True)
             if align:
                 const = cmds.normalConstraint([point], scatter_instance)
                 cmds.delete(const)
