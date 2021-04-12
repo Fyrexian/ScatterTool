@@ -8,6 +8,7 @@ import maya.cmds as cmds
 
 log = logging.getLogger(__name__)
 
+
 def maya_main_window():
     """Return the maya main window widget"""
     main_window = omui.MQtUtil.mainWindow()
@@ -16,6 +17,7 @@ def maya_main_window():
 
 class ScatterUI(QtWidgets.QDialog):
     """Smart Class UI Class"""
+
     def __init__(self):
         super(ScatterUI, self).__init__(parent=maya_main_window())
         self.setWindowTitle("Scatter")
@@ -45,11 +47,9 @@ class ScatterUI(QtWidgets.QDialog):
         self.setLayout(self.main_lay)
 
     def create_connections(self):
-        self.save_btn.clicked.connect(self._save)
+        self.scatter_btn.clicked.connect(self._scatter)
         """self.folder_browse_btn.clicked.connect(self._browse_folder)
         self.save_increment_btn.clicked.connect(self._save_increment)"""
-
-
 
     @QtCore.Slot()
     def _save_increment(self):
@@ -57,12 +57,12 @@ class ScatterUI(QtWidgets.QDialog):
         self.scenefile.save_increment()
         self.ver_sbx.setValue(self.scenefile.ver)
 
-
     @QtCore.Slot()
-    def _save(self):
+    def _scatter(self):
         """Save the Scene"""
-        self._set_scenefile_properties_from_ui()
-        self.scenefile.save()
+        """self._set_scenefile_properties_from_ui()
+        self.scenefile.save()"""
+        self.scenefile.scattertest()
 
     def _set_scenefile_properties_from_ui(self):
         self.scenefile.folder_path = self.folder_le.text()
@@ -77,16 +77,13 @@ class ScatterUI(QtWidgets.QDialog):
         folder = QtWidgets.QFileDialog.getExistingDirectory(
             parent=self, caption="Select Folder", dir=self.folder_le.text(),
             options=QtWidgets.QFileDialog.ShowDirsOnly |
-            QtWidgets.QFileDialog.DontResolveSymlinks)
+                    QtWidgets.QFileDialog.DontResolveSymlinks)
         self.folder_le.setText(folder)
 
-
     def _create_button_ui(self):
-        self.save_btn = QtWidgets.QPushButton("Scatter")
-        """self.save_increment_btn = QtWidgets.QPushButton("Save Increment")
-        layout.addWidget(self.save_increment_btn)"""
+        self.scatter_btn = QtWidgets.QPushButton("Scatter")
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.save_btn)
+        layout.addWidget(self.scatter_btn)
         return layout
 
     """
@@ -123,7 +120,6 @@ class ScatterUI(QtWidgets.QDialog):
         return layout"""
 
     def _create_objselector_ui(self):
-
         self.scatterOG = QtWidgets.QLineEdit()
         self.scatterOGButton = QtWidgets.QPushButton("Select")
         self.scatterTo = QtWidgets.QLineEdit()
@@ -131,21 +127,21 @@ class ScatterUI(QtWidgets.QDialog):
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Obj to Scatter:"), 0, 0)
         layout.addWidget(self.scatterOG, 0, 1)
-        layout.addWidget(self.scatterOGButton, 0 , 2)
+        layout.addWidget(self.scatterOGButton, 0, 2)
         layout.addWidget(QtWidgets.QLabel("Obj to Scatter on:"), 0, 3)
         layout.addWidget(self.scatterTo, 0, 4)
         layout.addWidget(self.scatterToButton, 0, 6)
         return layout
 
     def _create_objscaler_ui(self):
-        self.RandomScale = QtWidgets.QLineEdit()
+        self.RandomScale = QtWidgets.QLineEdit("1")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Scale(only numbers):"), 0, 0)
         layout.addWidget(self.RandomScale, 0, 0)
         return layout
 
     def _create_objrotation_ui(self):
-        self.RandomRotation = QtWidgets.QLineEdit()
+        self.RandomRotation = QtWidgets.QLineEdit("1")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Rotation(only numbers):"), 0, 0)
         layout.addWidget(self.RandomRotation, 0, 0)
@@ -225,3 +221,44 @@ class SceneFile(object):
         """Increments"""
         self.ver = self.next_avail_ver()
         self.save()
+
+    def scattertest(self):
+        verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+        print(verts)
+        self.scatter(verts)
+
+    def scatter(verts, scatter_obj='pSphere1', align=True):
+        for point in verts:
+            print(point)
+            pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
+            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
+            cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
+            if align:
+                const = cmds.normalConstraint([point], scatter_instance)
+                cmds.delete(const)
+
+
+class ScatterScene:
+    def __init__(self):
+        self.verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+
+    def scattertest(self):
+        """verts = cmds.ls("pPlane1.vtx[*]", flatten=True)"""
+        print(self.verts)
+        self.scatter()
+
+    def scatter(self, scatter_obj='pSphere1', align=True):
+        for point in self.verts:
+            print(point)
+            pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
+            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
+            cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
+            if align:
+                const = cmds.normalConstraint([point], scatter_instance)
+                cmds.delete(const)
+
+    """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")"""
+    """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")
+    verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+    print(verts)
+    scatter(verts)"""
