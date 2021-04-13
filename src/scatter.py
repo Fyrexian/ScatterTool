@@ -51,6 +51,7 @@ class ScatterUI(QtWidgets.QDialog):
 
     def create_connections(self):
         self.scatter_btn.clicked.connect(self._scatter)
+        self.scatterOGButton.clicked.connect(self._selectOG)
         """self.folder_browse_btn.clicked.connect(self._browse_folder)
         self.save_increment_btn.clicked.connect(self._save_increment)"""
 
@@ -63,16 +64,27 @@ class ScatterUI(QtWidgets.QDialog):
     @QtCore.Slot()
     def _scatter(self):
         """Save the Scene"""
-        """self._set_scenefile_properties_from_ui()
-        self.scenefile.save()"""
-        self.scatterscene.scattertest()
+        self._set_scenefile_properties_from_ui()
+        """self.scenefile.save()"""
+        self.scatterscene.scatter()
+
+    @QtCore.Slot()
+    def _selectOG(self):
+        selected = cmds.ls(sl=True)
+        print(selected[0])
+        self.scatterOG.setText(selected[0])
 
     def _set_scenefile_properties_from_ui(self):
-        self.scenefile.folder_path = self.folder_le.text()
+        self.scatterscene.scalenumbermin = self.RandomScalemin.value()
+        self.scatterscene.scalenumbermax = self.RandomScalemax.value()
+        self.scatterscene.rotationNumbermin = self.RandomRotationmin.value()
+        self.scatterscene.rotationNumbermax = self.RandomRotationmax.value()
+        self.scatterscene.objecttoscatter = self.scatterOG.text()
+        """self.scenefile.folder_path = self.folder_le.text()
         self.scenefile.descriptor = self.descriptor_le.text()
         self.scenefile.task = self.task_le.text()
         self.scenefile.ver = self.ver_sbx.value()
-        self.scenefile.ext = self.ext_lbl.text()
+        self.scenefile.ext = self.ext_lbl.text()"""
 
     """@QtCore.Slot()
     def _browse_folder(self):
@@ -263,6 +275,7 @@ class SceneFile(object):
 class ScatterScene:
     def __init__(self):
         self.verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+        self.objecttoscatter = "pCube1"
         self.scalenumbermin = .1
         self.scalenumbermax = .2
         self.scalerandomnumber = .5
@@ -275,7 +288,8 @@ class ScatterScene:
         print(self.verts)
         self.scatter()
 
-    def scatter(self, scatter_obj='pCube1', align=True):
+    def scatter(self, align=True):
+        scatter_obj = self.objecttoscatter
         for point in self.verts:
             print(point)
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
