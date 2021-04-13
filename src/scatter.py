@@ -52,6 +52,7 @@ class ScatterUI(QtWidgets.QDialog):
     def create_connections(self):
         self.scatter_btn.clicked.connect(self._scatter)
         self.scatterOGButton.clicked.connect(self._selectOG)
+        self.scatterToButton.clicked.connect(self._selectTarget)
         """self.folder_browse_btn.clicked.connect(self._browse_folder)
         self.save_increment_btn.clicked.connect(self._save_increment)"""
 
@@ -74,12 +75,19 @@ class ScatterUI(QtWidgets.QDialog):
         print(selected[0])
         self.scatterOG.setText(selected[0])
 
+    @QtCore.Slot()
+    def _selectTarget(self):
+        selected = cmds.ls(sl=True)
+        print(selected[0])
+        self.scatterTo.setText(selected[0])
+
     def _set_scenefile_properties_from_ui(self):
         self.scatterscene.scalenumbermin = self.RandomScalemin.value()
         self.scatterscene.scalenumbermax = self.RandomScalemax.value()
         self.scatterscene.rotationNumbermin = self.RandomRotationmin.value()
         self.scatterscene.rotationNumbermax = self.RandomRotationmax.value()
         self.scatterscene.objecttoscatter = self.scatterOG.text()
+        self.scatterscene.objecttoTarget = self.scatterTo.text()
         """self.scenefile.folder_path = self.folder_le.text()
         self.scenefile.descriptor = self.descriptor_le.text()
         self.scenefile.task = self.task_le.text()
@@ -274,7 +282,9 @@ class SceneFile(object):
 
 class ScatterScene:
     def __init__(self):
-        self.verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
+        self.objecttoTarget = "pSphere1"
+        self.verts = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
+        print(self.verts)
         self.objecttoscatter = "pCube1"
         self.scalenumbermin = .1
         self.scalenumbermax = .2
@@ -286,9 +296,11 @@ class ScatterScene:
     def scattertest(self):
         """verts = cmds.ls("pPlane1.vtx[*]", flatten=True)"""
         print(self.verts)
-        self.scatter()
+        """self.scatter()"""
 
     def scatter(self, align=True):
+        self.verts = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
+        print(self.verts)
         scatter_obj = self.objecttoscatter
         for point in self.verts:
             print(point)
