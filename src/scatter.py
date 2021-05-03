@@ -107,6 +107,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.scatterscene.objecttoscatter = self.scatterOG.text()
         self.scatterscene.objecttoTarget = self.scatterTo.text()
         self.scatterscene.randomVertexes = self.RandomVertexes.value()
+        self.scatterscene.NormalChecker1 = self.NormalChecker.checkState()
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
@@ -300,6 +301,7 @@ class ScatterScene:
         self.rotationNumbermax = 5
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
         self.randomVertexes = 100
+        self.NormalChecker1 = False;
 
 
     def scattertest(self):
@@ -319,9 +321,12 @@ class ScatterScene:
             self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
             cmds.scale(self.scalerandomnumber, self.scalerandomnumber,self.scalerandomnumber, scatter_instance, absolute=True)
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
-            if align:
-                const = cmds.normalConstraint([point], scatter_instance)
-                cmds.delete(const)
+            if not self.NormalChecker1:
+                if align:
+                    const = cmds.normalConstraint([point], scatter_instance)
+                    cmds.delete(const)
+            else:
+                const = cmds.normalConstraint([point], scatter_instance, aimVector=[0.0, 1.0, 0.0])
             cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
                         relative=True, componentSpace=True)
 
@@ -341,9 +346,12 @@ class ScatterScene:
             cmds.scale(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
                        absolute=True)
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
-            if align:
-                const = cmds.normalConstraint([vert], scatter_instance)
-                cmds.delete(const)
+            if not self.NormalChecker1:
+                if align:
+                    const = cmds.normalConstraint([vert], scatter_instance)
+                    cmds.delete(const)
+            else:
+                const = cmds.normalConstraint([vert], scatter_instance, aimVector=[0.0, 1.0, 0.0])
             cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
                         relative=True, componentSpace=True)
 
