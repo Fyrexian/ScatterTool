@@ -217,98 +217,10 @@ class ScatterUI(QtWidgets.QDialog):
         return layout
 
 
-
-class SceneFile(object):
-    """An abstract representation of a Scene file."""
-
-    def __init__(self, path=None):
-        self._folder_path = Path(cmds.workspace(query=True,
-                                                rootDirectory=True)) / "scenes"
-        self.descriptor = 'main'
-        self.task = 'model'
-        self.ver = 1
-        self.ext = '.ma'
-        scene = pmc.system.sceneName()
-        if not path and scene:
-            path = scene
-        if not path and not scene:
-            log.info("Initialize with default properties")
-            return
-        self._init_from_path(path)
-
-    @property
-    def folder_path(self):
-        return self._folder_path
-
-    @folder_path.setter
-    def folder_path(self, val):
-        self._folder_path = Path(val)
-
-    @property
-    def filename(self):
-        pattern = "{descriptor}_{task}_v{ver:03d}{ext}"
-        return pattern.format(descriptor=self.descriptor,
-                              task=self.task,
-                              ver=self.ver,
-                              ext=self.ext)
-
-    @property
-    def path(self):
-        return self.folder_path / self.filename
-
-    def _init_from_path(self, path=None):
-        path = Path(path)
-        self.folder_path = path.parent
-        self.ext = path.ext
-        self.descriptor, self.task, ver = path.name.stripext().split("_")
-        self.ver = int(ver.split("v")[-1])
-
-    def save(self):
-        """saves the scenefile"""
-        try:
-            return pmc.system.saveAs(self.path)
-        except RuntimeError as err:
-            log.warning("Missing directories in path. Creating folders.")
-            self.folder_path.makedirs_p()
-            return pmc.system.saveAs(self.path)
-
-    def next_avail_ver(self):
-        pattern = "{descriptor}_{task}_v*{ext}".format(
-            descriptor=self.descriptor, task=self.task, ext=self.ext)
-        matching_scenefiles = []
-        for file_ in self.folder_path.files():
-            if file_.name.fnmatch(pattern):
-                matching_scenefiles.append(file_)
-        if not matching_scenefiles:
-            return 1
-        matching_scenefiles.sort(reverse=True)
-        latest_scenefile = matching_scenefiles[0]
-        latest_scenefile = latest_scenefile.name.stripext()
-        latest_version_num = int(latest_scenefile.split("_v")[-1])
-        return latest_version_num + 1
-
-
-
-    def scattertest(self):
-        verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
-        print(verts)
-        self.scatter(verts)
-
-    def scatter(verts, scatter_obj='pSphere1', align=True):
-        for point in verts:
-            print(point)
-            pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
-            cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
-            if align:
-                const = cmds.normalConstraint([point], scatter_instance)
-                cmds.delete(const)
-
-
 class ScatterScene:
     def __init__(self):
         self.objecttoTarget = "pSphere1"
-        self.verts = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
+        self.verts = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
         """print(self.verts)"""
         self.objecttoscatter = "pCube1"
         self.scalenumbermin = .1
@@ -319,12 +231,11 @@ class ScatterScene:
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
 
-        self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
+        self.vertexesToTarget = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
         self.randomVertexes = 100
         self.NormalChecker1 = False;
         self.LastScatterGroup = [0, 1]
         del self.LastScatterGroup[:]
-
 
     def scattertest(self):
         """verts = cmds.ls("pPlane1.vtx[*]", flatten=True)"""
@@ -339,13 +250,14 @@ class ScatterScene:
         for point in self.verts:
             print(point)
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+point)
+            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter + "_scat_inst_" + point)
             self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
-            self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
+            self.scalerandomnumber = random.uniform(self.scalenumbermin, self.scalenumbermax)
             self.scalerandomnumber2 = random.uniform(self.scalenumbermin, self.scalenumbermax)
             self.scalerandomnumber3 = random.uniform(self.scalenumbermin, self.scalenumbermax)
-            cmds.scale(self.scalerandomnumber, self.scalerandomnumber2,self.scalerandomnumber3, scatter_instance, absolute=True)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber2, self.scalerandomnumber3, scatter_instance,
+                       absolute=True)
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             self.scalerandomnumber2 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             self.scalerandomnumber3 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
@@ -362,12 +274,12 @@ class ScatterScene:
         scatter_obj = self.objecttoscatter
         len(self.vertexesToTarget)
         del self.LastScatterGroup[:]
-        random_amount = int(round(len(self.vertexesToTarget) * (self.randomVertexes*.01)))
+        random_amount = int(round(len(self.vertexesToTarget) * (self.randomVertexes * .01)))
         print(random_amount)
         percentage_selection = random.sample(self.vertexesToTarget, k=random_amount)
         for vert in percentage_selection:
             pos = cmds.xform([vert], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+vert)
+            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter + "_scat_inst_" + vert)
             self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             nconst = cmds.normalConstraint([vert], scatter_instance)
@@ -393,7 +305,6 @@ class ScatterScene:
         for eachSel in self.LastScatterGroup:
             cmds.select(eachSel)
             cmds.delete(eachSel)
-
 
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")"""
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")
