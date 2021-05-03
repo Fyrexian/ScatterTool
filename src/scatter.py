@@ -210,7 +210,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomVertexes.setMinimum(0)
         self.RandomVertexes.setMaximum(100)
         self.RandomVertexes.setValue(100)
-        
+
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Percentage(only whole numbers):"), 0, 0)
         layout.addWidget(self.RandomVertexes, 1, 1)
@@ -340,7 +340,6 @@ class ScatterScene:
             print(point)
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
             scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+point)
-
             self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
@@ -369,7 +368,7 @@ class ScatterScene:
         for vert in percentage_selection:
             pos = cmds.xform([vert], query=True, worldSpace=True, translation=True)
             scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+vert)
-            """self.LastScatterGroup.append(self.objecttoscatter + "_scat_inst_" +)"""
+            self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             nconst = cmds.normalConstraint([vert], scatter_instance)
             cmds.delete(nconst)
