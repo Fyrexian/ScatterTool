@@ -210,6 +210,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomVertexes.setMinimum(0)
         self.RandomVertexes.setMaximum(100)
         self.RandomVertexes.setValue(100)
+        
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Percentage(only whole numbers):"), 0, 0)
         layout.addWidget(self.RandomVertexes, 1, 1)
@@ -317,7 +318,7 @@ class ScatterScene:
         self.scalerandomnumber3 = .5
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
-        
+
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
         self.randomVertexes = 100
         self.NormalChecker1 = False;
