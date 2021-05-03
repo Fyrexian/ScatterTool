@@ -38,6 +38,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.Rotation_lay = self._create_objrotation_ui()
         self.VertexTitle_lbl = QtWidgets.QLabel("Scatter to Vertexes?")
         self.VertexTitle_lbl.setStyleSheet("font: bold 15px")
+        self.VertexRandom_lay = self._vertexrandom_ui()
         self.Settings_lbl = QtWidgets.QLabel("Settings:")
         self.Settings_lbl.setStyleSheet("font: bold 13px")
         self.VertexSelector_lay = self._create_vertexselector_ui()
@@ -48,6 +49,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.main_lay.addLayout(self.Scatters_lay)
         self.main_lay.addWidget(self.VertexTitle_lbl)
         self.main_lay.addLayout(self.VertexSelector_lay)
+        self.main_lay.addLayout(self.VertexRandom_lay)
         self.main_lay.addWidget(self.Settings_lbl)
         self.main_lay.addLayout(self.Scale_lay)
         self.main_lay.addLayout(self.Rotation_lay)
@@ -174,6 +176,18 @@ class ScatterUI(QtWidgets.QDialog):
         layout.addWidget(self.scatterVX_To, 0, 0)
         layout.addWidget(self.scatterVX_ToButton, 0, 0)
         return layout
+
+    def _vertexrandom_ui(self):
+        self.RandomVertexes = QtWidgets.QSpinBox()
+        self.RandomVertexes.setFixedWidth(100)
+        self.RandomVertexes.setMinimum(0)
+        self.RandomVertexes.setMaximum(100)
+        self.RandomVertexes.setValue(100)
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(QtWidgets.QLabel("Random Percentage(only whole numbers):"), 0, 0)
+        layout.addWidget(self.RandomVertexes, 0, -1)
+        return layout
+
 
 
 class SceneFile(object):
