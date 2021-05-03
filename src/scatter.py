@@ -104,6 +104,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.scatterscene.rotationNumbermax = self.RandomRotationmax.value()
         self.scatterscene.objecttoscatter = self.scatterOG.text()
         self.scatterscene.objecttoTarget = self.scatterTo.text()
+        self.scatterscene.randomVertexes = self.RandomVertexes.value()
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
@@ -289,6 +290,7 @@ class ScatterScene:
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
+        self.randomVertexes = 100
 
 
     def scattertest(self):
@@ -316,7 +318,11 @@ class ScatterScene:
 
     def scatter2(self, align=True):
         scatter_obj = self.objecttoscatter
-        for vert in self.vertexesToTarget:
+        len(self.vertexesToTarget)
+        random_amount = int(round(len(self.vertexesToTarget) * .5))
+        print(random_amount)
+        percentage_selection = random.sample(self.vertexesToTarget, k=random_amount)
+        for vert in percentage_selection:
             pos = cmds.xform([vert], query=True, worldSpace=True, translation=True)
             scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
