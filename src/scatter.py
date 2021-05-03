@@ -230,6 +230,7 @@ class ScatterScene:
         self.scalerandomnumber3 = .5
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
+        self.counterN= 0
 
         self.vertexesToTarget = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
         self.randomVertexes = 100
@@ -245,14 +246,18 @@ class ScatterScene:
     def scatter(self, align=True):
         self.verts = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
         del self.LastScatterGroup[:]
-        print(self.verts)
+        """print(self.verts)"""
         scatter_obj = self.objecttoscatter
         for point in self.verts:
-            print(point)
+            """print(point)"""
+            self.counterN += 1
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter + "_scat_inst_" + point)
+            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter + "_scat_inst_"+str(self.counterN))
             self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
+            """cmds.setAttr(self.objecttoscatter + "_scat_inst_"+str(self.counterN) + ".translateX", pos[0])
+            cmds.setAttr(self.objecttoscatter + "_scat_inst_" + str(self.counterN) + ".translateY", pos[1])
+            cmds.setAttr(self.objecttoscatter + "_scat_inst_" + str(self.counterN) + ".translateZ", pos[2])"""
             self.scalerandomnumber = random.uniform(self.scalenumbermin, self.scalenumbermax)
             self.scalerandomnumber2 = random.uniform(self.scalenumbermin, self.scalenumbermax)
             self.scalerandomnumber3 = random.uniform(self.scalenumbermin, self.scalenumbermax)
