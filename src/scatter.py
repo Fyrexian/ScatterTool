@@ -42,6 +42,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.Settings_lbl = QtWidgets.QLabel("Settings:")
         self.Settings_lbl.setStyleSheet("font: bold 13px")
         self.VertexSelector_lay = self._create_vertexselector_ui()
+        self.NormalChecker_lay = self._normal_contstraint_ui()
         self.button_lay = self._create_button_ui()
         self.button_lay2 = self._create_button_ui2()
         self.main_lay = QtWidgets.QVBoxLayout()
@@ -54,6 +55,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.main_lay.addLayout(self.Scale_lay)
         self.main_lay.addLayout(self.Rotation_lay)
         self.main_lay.addStretch()
+        self.main_lay.addLayout(self.NormalChecker_lay)
         self.main_lay.addLayout(self.button_lay)
         self.main_lay.addLayout(self.button_lay2)
         self.setLayout(self.main_lay)
@@ -119,11 +121,11 @@ class ScatterUI(QtWidgets.QDialog):
         self.scatterToButton = QtWidgets.QPushButton("Select")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Obj to Scatter:"), 0, 0)
-        layout.addWidget(self.scatterOG, 0, 1)
-        layout.addWidget(self.scatterOGButton, 0, 2)
-        layout.addWidget(QtWidgets.QLabel("Obj to Scatter on:"), 0, 3)
-        layout.addWidget(self.scatterTo, 0, 4)
-        layout.addWidget(self.scatterToButton, 0, 6)
+        layout.addWidget(self.scatterOG, 1, 0)
+        layout.addWidget(self.scatterOGButton, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Obj to Scatter on:"), 0, 0)
+        layout.addWidget(self.scatterTo, 1, 0)
+        layout.addWidget(self.scatterToButton, 0, 0)
         return layout
 
     def _create_objscaler_ui(self):
@@ -138,9 +140,9 @@ class ScatterUI(QtWidgets.QDialog):
         """self.RandomScale = QtWidgets.setValue(self.scatterscene.scalenumber)"""
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Scale Min(only numbers):"), 0, 0)
-        layout.addWidget(self.RandomScalemin, 0, 1)
-        layout.addWidget(QtWidgets.QLabel("Random Scale Max(only numbers):"), 0, 2)
-        layout.addWidget(self.RandomScalemax, 0, 3)
+        layout.addWidget(self.RandomScalemin, 1, 0)
+        layout.addWidget(QtWidgets.QLabel("Random Scale Max(only numbers):"), 1, 1)
+        layout.addWidget(self.RandomScalemax, 4, 1)
         return layout
 
     def _create_objrotation_ui(self):
@@ -154,9 +156,16 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomRotationmax.setFixedWidth(100)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Rotation Min(only numbers):"), 0, 0)
-        layout.addWidget(self.RandomRotationmin, 0, 1)
-        layout.addWidget(QtWidgets.QLabel("Random Rotation Max(only numbers):"), 0, 2)
-        layout.addWidget(self.RandomRotationmax, 0, 3)
+        layout.addWidget(self.RandomRotationmin, 1, 0)
+        layout.addWidget(QtWidgets.QLabel("Random Rotation Max(only numbers):"), 1, 1)
+        layout.addWidget(self.RandomRotationmax, 4, 1)
+        return layout
+
+    def _normal_contstraint_ui(self):
+        self.NormalChecker = QtWidgets.QCheckBox()
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(QtWidgets.QLabel("Align to the normals:"), 0, 0)
+        layout.addWidget(self.NormalChecker, 1, 0)
         return layout
 
     """--------------------------------------------------------------------------------------------------------------"""
@@ -186,7 +195,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomVertexes.setValue(100)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Percentage(only whole numbers):"), 0, 0)
-        layout.addWidget(self.RandomVertexes, 0, -1)
+        layout.addWidget(self.RandomVertexes, 1, 1)
         return layout
 
 
