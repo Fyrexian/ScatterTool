@@ -1,5 +1,4 @@
 import random
-
 from pymel.core.system import Path
 import pymel.core as pmc
 import logging
@@ -23,11 +22,10 @@ class ScatterUI(QtWidgets.QDialog):
     def __init__(self):
         super(ScatterUI, self).__init__(parent=maya_main_window())
         self.setWindowTitle("Scatter")
-        self.setMinimumWidth(500)
-        self.setMaximumHeight(200)
+        self.setMinimumWidth(600)
+        self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
-        self.scenefile = SceneFile()
         self.scatterscene = ScatterScene()
         self.create_ui()
         self.create_connections()
@@ -38,36 +36,44 @@ class ScatterUI(QtWidgets.QDialog):
         self.Scatters_lay = self._create_objselector_ui()
         self.Scale_lay = self._create_objscaler_ui()
         self.Rotation_lay = self._create_objrotation_ui()
-        """self.filename_lay = self._create_filename_ui()"""
+        self.VertexTitle_lbl = QtWidgets.QLabel("Scatter to Vertexes?")
+        self.VertexTitle_lbl.setStyleSheet("font: bold 15px")
+        self.Settings_lbl = QtWidgets.QLabel("Settings:")
+        self.Settings_lbl.setStyleSheet("font: bold 13px")
+        self.VertexSelector_lay = self._create_vertexselector_ui()
         self.button_lay = self._create_button_ui()
+        self.button_lay2 = self._create_button_ui2()
         self.main_lay = QtWidgets.QVBoxLayout()
         self.main_lay.addWidget(self.title_lbl)
         self.main_lay.addLayout(self.Scatters_lay)
+        self.main_lay.addWidget(self.VertexTitle_lbl)
+        self.main_lay.addLayout(self.VertexSelector_lay)
+        self.main_lay.addWidget(self.Settings_lbl)
         self.main_lay.addLayout(self.Scale_lay)
         self.main_lay.addLayout(self.Rotation_lay)
         self.main_lay.addStretch()
         self.main_lay.addLayout(self.button_lay)
+        self.main_lay.addLayout(self.button_lay2)
         self.setLayout(self.main_lay)
 
     def create_connections(self):
         self.scatter_btn.clicked.connect(self._scatter)
         self.scatterOGButton.clicked.connect(self._selectOG)
         self.scatterToButton.clicked.connect(self._selectTarget)
-        """self.folder_browse_btn.clicked.connect(self._browse_folder)
-        self.save_increment_btn.clicked.connect(self._save_increment)"""
-
-    @QtCore.Slot()
-    def _save_increment(self):
-        self._set_scenefile_properties_from_ui()
-        self.scenefile.save_increment()
-        self.ver_sbx.setValue(self.scenefile.ver)
+        self.scatterVX_ToButton.clicked.connect(self._scatterVX_To)
+        self.scatterVX_btn.clicked.connect(self._scatter2)
 
     @QtCore.Slot()
     def _scatter(self):
-        """Save the Scene"""
+        """scatters"""
         self._set_scenefile_properties_from_ui()
-        """self.scenefile.save()"""
         self.scatterscene.scatter()
+
+    @QtCore.Slot()
+    def _scatter2(self):
+        """scatters"""
+        self._set_scenefile_properties_from_ui()
+        self.scatterscene.scatter2()
 
     @QtCore.Slot()
     def _selectOG(self):
@@ -81,6 +87,14 @@ class ScatterUI(QtWidgets.QDialog):
         print(selected[0])
         self.scatterTo.setText(selected[0])
 
+    @QtCore.Slot()
+    def _scatterVX_To(self):
+        verts = cmds.ls(selection=True, flatten=True)
+        selected = cmds.ls(sl=True)
+        print(verts)
+        self.scatterVX_To.setText(verts[0])
+        self.scatterscene.vertexesToTarget = verts
+
     def _set_scenefile_properties_from_ui(self):
         self.scatterscene.scalenumbermin = self.RandomScalemin.value()
         self.scatterscene.scalenumbermax = self.RandomScalemax.value()
@@ -88,59 +102,12 @@ class ScatterUI(QtWidgets.QDialog):
         self.scatterscene.rotationNumbermax = self.RandomRotationmax.value()
         self.scatterscene.objecttoscatter = self.scatterOG.text()
         self.scatterscene.objecttoTarget = self.scatterTo.text()
-        """self.scenefile.folder_path = self.folder_le.text()
-        self.scenefile.descriptor = self.descriptor_le.text()
-        self.scenefile.task = self.task_le.text()
-        self.scenefile.ver = self.ver_sbx.value()
-        self.scenefile.ext = self.ext_lbl.text()"""
-
-    """@QtCore.Slot()
-    def _browse_folder(self):
-        Opens a dialogue box to browse the folder
-        folder = QtWidgets.QFileDialog.getExistingDirectory(
-            parent=self, caption="Select Folder", dir=self.folder_le.text(),
-            options=QtWidgets.QFileDialog.ShowDirsOnly |
-                    QtWidgets.QFileDialog.DontResolveSymlinks)
-        self.folder_le.setText(folder)"""
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.scatter_btn)
         return layout
-
-    """
-    def _create_filename_ui(self):
-        layout = self._create_filename_headers()
-        self.descriptor_le = QtWidgets.QLineEdit(self.scenefile.descriptor)
-        self.descriptor_le.setMinimumWidth(50)
-        self.task_le = QtWidgets.QLineEdit(self.scenefile.task)
-        self.task_le.setFixedWidth(50)
-        self.ver_sbx = QtWidgets.QSpinBox()
-        self.ver_sbx.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
-        self.ver_sbx.setFixedWidth(50)
-        self.ver_sbx.setValue(self.scenefile.ver)
-
-        layout.addWidget(self.descriptor_le, 1, 0)
-        layout.addWidget(QtWidgets.QLabel("_"), 1, 1)
-        layout.addWidget(self.task_le, 1, 2)
-        layout.addWidget(QtWidgets.QLabel("_v"), 1, 3)
-        layout.addWidget(self.ver_sbx, 1, 4)
-
-        return layout
-
-    def _create_filename_headers(self):
-        self.descriptor_header_lbl = QtWidgets.QLabel("Random Scale(numbers only)")
-        self.descriptor_header_lbl.setStyleSheet("font: bold")
-        self.task_header_lbl = QtWidgets.QLabel("Task")
-        self.task_header_lbl.setStyleSheet("font: bold")
-        self.ver_header_lbl = QtWidgets.QLabel("Version")
-        self.ver_header_lbl.setStyleSheet("font: bold")
-        layout = QtWidgets.QGridLayout()
-        layout.addWidget(self.descriptor_header_lbl, 0, 0)
-        layout.addWidget(self.task_header_lbl, 0, 2)
-        layout.addWidget(self.ver_header_lbl, 0, 4)
-        return layout"""
 
     def _create_objselector_ui(self):
         self.scatterOG = QtWidgets.QLineEdit()
@@ -187,6 +154,25 @@ class ScatterUI(QtWidgets.QDialog):
         layout.addWidget(self.RandomRotationmin, 0, 1)
         layout.addWidget(QtWidgets.QLabel("Random Rotation Max(only numbers):"), 0, 2)
         layout.addWidget(self.RandomRotationmax, 0, 3)
+        return layout
+
+    """--------------------------------------------------------------------------------------------------------------"""
+    """Vertex layout"""
+
+    def _create_button_ui2(self):
+        self.scatterVX_btn = QtWidgets.QPushButton("Scatter to Vertexes")
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(self.scatterVX_btn)
+        return layout
+
+    def _create_vertexselector_ui(self):
+        """vertex selector"""
+        self.scatterVX_To = QtWidgets.QLineEdit()
+        self.scatterVX_ToButton = QtWidgets.QPushButton("Select")
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(QtWidgets.QLabel("Vertexes to Scatter on:"), 0, 0)
+        layout.addWidget(self.scatterVX_To, 0, 0)
+        layout.addWidget(self.scatterVX_ToButton, 0, 0)
         return layout
 
 
@@ -259,10 +245,7 @@ class SceneFile(object):
         latest_version_num = int(latest_scenefile.split("_v")[-1])
         return latest_version_num + 1
 
-    def save_increment(self):
-        """Increments"""
-        self.ver = self.next_avail_ver()
-        self.save()
+
 
     def scattertest(self):
         verts = cmds.ls("pPlane1.vtx[*]", flatten=True)
@@ -284,13 +267,14 @@ class ScatterScene:
     def __init__(self):
         self.objecttoTarget = "pSphere1"
         self.verts = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
-        print(self.verts)
+        """print(self.verts)"""
         self.objecttoscatter = "pCube1"
         self.scalenumbermin = .1
         self.scalenumbermax = .2
         self.scalerandomnumber = .5
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
+        self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
 
 
     def scattertest(self):
@@ -312,6 +296,24 @@ class ScatterScene:
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             if align:
                 const = cmds.normalConstraint([point], scatter_instance)
+                cmds.delete(const)
+            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+                        relative=True, componentSpace=True)
+
+    def scatter2(self, align=True):
+        scatter_obj = self.objecttoscatter
+        for vert in self.vertexesToTarget:
+            pos = cmds.xform([vert], query=True, worldSpace=True, translation=True)
+            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
+            cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
+            nconst = cmds.normalConstraint([vert], scatter_instance)
+            cmds.delete(nconst)
+            self.scalerandomnumber = random.uniform(self.scalenumbermin, self.scalenumbermax)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+                       absolute=True)
+            self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
+            if align:
+                const = cmds.normalConstraint([vert], scatter_instance)
                 cmds.delete(const)
             cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
                         relative=True, componentSpace=True)
