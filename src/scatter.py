@@ -134,10 +134,12 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomScalemin = QtWidgets.QDoubleSpinBox()
         self.RandomScalemin.setValue(self.scatterscene.scalenumbermin)
         self.RandomScalemin.setFixedWidth(100)
+        self.RandomScalemin.setMaximum(999)
         """max settings"""
         self.RandomScalemax = QtWidgets.QDoubleSpinBox()
         self.RandomScalemax.setValue(self.scatterscene.scalenumbermax)
         self.RandomScalemax.setFixedWidth(100)
+        self.RandomScalemax.setMaximum(999)
         """self.RandomScale = QtWidgets.setValue(self.scatterscene.scalenumber)"""
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Scale Min(only numbers):"), 0, 0)
@@ -151,10 +153,12 @@ class ScatterUI(QtWidgets.QDialog):
         self.RandomRotationmin = QtWidgets.QDoubleSpinBox()
         self.RandomRotationmin.setValue(self.scatterscene.rotationNumbermin)
         self.RandomRotationmin.setFixedWidth(100)
+        self.RandomRotationmin.setMaximum(360)
         """max settings"""
         self.RandomRotationmax = QtWidgets.QDoubleSpinBox()
         self.RandomRotationmax.setValue(self.scatterscene.rotationNumbermax)
         self.RandomRotationmax.setFixedWidth(100)
+        self.RandomRotationmax.setMaximum(360)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Random Rotation Min(only numbers):"), 0, 0)
         layout.addWidget(self.RandomRotationmin, 1, 0)
@@ -297,6 +301,8 @@ class ScatterScene:
         self.scalenumbermin = .1
         self.scalenumbermax = .2
         self.scalerandomnumber = .5
+        self.scalerandomnumber2 = .5
+        self.scalerandomnumber3 = .5
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
@@ -319,21 +325,26 @@ class ScatterScene:
             scatter_instance = cmds.instance(scatter_obj, name="scat_inst"+point)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
-            cmds.scale(self.scalerandomnumber, self.scalerandomnumber,self.scalerandomnumber, scatter_instance, absolute=True)
+            self.scalerandomnumber2 = random.uniform(self.scalenumbermin, self.scalenumbermax)
+            self.scalerandomnumber3 = random.uniform(self.scalenumbermin, self.scalenumbermax)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber2,self.scalerandomnumber3, scatter_instance, absolute=True)
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
+            self.scalerandomnumber2 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
+            self.scalerandomnumber3 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             if not self.NormalChecker1:
                 if align:
                     const = cmds.normalConstraint([point], scatter_instance)
                     cmds.delete(const)
             else:
                 const = cmds.normalConstraint([point], scatter_instance, aimVector=[0.0, 1.0, 0.0])
-            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber2, self.scalerandomnumber3, scatter_instance,
                         relative=True, componentSpace=True)
 
     def scatter2(self, align=True):
         scatter_obj = self.objecttoscatter
         len(self.vertexesToTarget)
-        random_amount = int(round(len(self.vertexesToTarget) * .5))
+
+        random_amount = int(round(len(self.vertexesToTarget) * (self.randomVertexes*.01)))
         print(random_amount)
         percentage_selection = random.sample(self.vertexesToTarget, k=random_amount)
         for vert in percentage_selection:
@@ -343,16 +354,20 @@ class ScatterScene:
             nconst = cmds.normalConstraint([vert], scatter_instance)
             cmds.delete(nconst)
             self.scalerandomnumber = random.uniform(self.scalenumbermin, self.scalenumbermax)
-            cmds.scale(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+            self.scalerandomnumber2 = random.uniform(self.scalenumbermin, self.scalenumbermax)
+            self.scalerandomnumber3 = random.uniform(self.scalenumbermin, self.scalenumbermax)
+            cmds.scale(self.scalerandomnumber, self.scalerandomnumber2, self.scalerandomnumber3, scatter_instance,
                        absolute=True)
             self.scalerandomnumber = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
+            self.scalerandomnumber2 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
+            self.scalerandomnumber3 = random.uniform(self.rotationNumbermin, self.rotationNumbermax)
             if not self.NormalChecker1:
                 if align:
                     const = cmds.normalConstraint([vert], scatter_instance)
                     cmds.delete(const)
             else:
                 const = cmds.normalConstraint([vert], scatter_instance, aimVector=[0.0, 1.0, 0.0])
-            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber, self.scalerandomnumber, scatter_instance,
+            cmds.rotate(self.scalerandomnumber, self.scalerandomnumber2, self.scalerandomnumber3, scatter_instance,
                         relative=True, componentSpace=True)
 
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")"""
