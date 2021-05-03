@@ -45,6 +45,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.NormalChecker_lay = self._normal_contstraint_ui()
         self.button_lay = self._create_button_ui()
         self.button_lay2 = self._create_button_ui2()
+        self.button_lay3 = self._undo_btn_ui3()
         self.main_lay = QtWidgets.QVBoxLayout()
         self.main_lay.addWidget(self.title_lbl)
         self.main_lay.addLayout(self.Scatters_lay)
@@ -58,6 +59,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.main_lay.addLayout(self.NormalChecker_lay)
         self.main_lay.addLayout(self.button_lay)
         self.main_lay.addLayout(self.button_lay2)
+        self.main_lay.addLayout(self.button_lay3)
         self.setLayout(self.main_lay)
 
     def create_connections(self):
@@ -66,6 +68,7 @@ class ScatterUI(QtWidgets.QDialog):
         self.scatterToButton.clicked.connect(self._selectTarget)
         self.scatterVX_ToButton.clicked.connect(self._scatterVX_To)
         self.scatterVX_btn.clicked.connect(self._scatter2)
+        self.undo_btn.clicked.connect(self._deleteLastScatter)
 
     @QtCore.Slot()
     def _scatter(self):
@@ -98,6 +101,9 @@ class ScatterUI(QtWidgets.QDialog):
         print(verts)
         self.scatterVX_To.setText(verts[0])
         self.scatterscene.vertexesToTarget = verts
+
+    def _deleteLastScatter(self):
+        self.scatterscene.deleteLastScatter()
 
     def _set_scenefile_properties_from_ui(self):
         self.scatterscene.scalenumbermin = self.RandomScalemin.value()
@@ -171,6 +177,12 @@ class ScatterUI(QtWidgets.QDialog):
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(QtWidgets.QLabel("Align to the normals:"), 0, 0)
         layout.addWidget(self.NormalChecker, 1, 0)
+        return layout
+
+    def _undo_btn_ui3(self):
+        self.undo_btn = QtWidgets.QPushButton("Undo Last Scatter")
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(self.undo_btn)
         return layout
 
     """--------------------------------------------------------------------------------------------------------------"""
@@ -308,6 +320,8 @@ class ScatterScene:
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
         self.randomVertexes = 100
         self.NormalChecker1 = False;
+        self.LastScatterGroup = [0, 1]
+        del self.LastScatterGroup[:]
 
 
     def scattertest(self):
@@ -317,12 +331,15 @@ class ScatterScene:
 
     def scatter(self, align=True):
         self.verts = cmds.ls(self.objecttoTarget + ".vtx[*]", flatten=True)
+        del self.LastScatterGroup[:]
         print(self.verts)
         scatter_obj = self.objecttoscatter
         for point in self.verts:
             print(point)
             pos = cmds.xform([point], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name="scat_inst"+point)
+            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+point)
+
+            self.LastScatterGroup.append(scatter_instance)
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             self.scalerandomnumber = random.uniform(self.scalenumbermin,self.scalenumbermax)
             self.scalerandomnumber2 = random.uniform(self.scalenumbermin, self.scalenumbermax)
@@ -343,13 +360,14 @@ class ScatterScene:
     def scatter2(self, align=True):
         scatter_obj = self.objecttoscatter
         len(self.vertexesToTarget)
-
+        del self.LastScatterGroup[:]
         random_amount = int(round(len(self.vertexesToTarget) * (self.randomVertexes*.01)))
         print(random_amount)
         percentage_selection = random.sample(self.vertexesToTarget, k=random_amount)
         for vert in percentage_selection:
             pos = cmds.xform([vert], query=True, worldSpace=True, translation=True)
-            scatter_instance = cmds.instance(scatter_obj, name="scat_inst")
+            scatter_instance = cmds.instance(scatter_obj, name=self.objecttoscatter+"_scat_inst_"+vert)
+            """self.LastScatterGroup.append(self.objecttoscatter + "_scat_inst_" +)"""
             cmds.move(pos[0], pos[1], pos[2], scatter_instance, worldSpace=True)
             nconst = cmds.normalConstraint([vert], scatter_instance)
             cmds.delete(nconst)
@@ -369,6 +387,12 @@ class ScatterScene:
                 const = cmds.normalConstraint([vert], scatter_instance, aimVector=[0.0, 1.0, 0.0])
             cmds.rotate(self.scalerandomnumber, self.scalerandomnumber2, self.scalerandomnumber3, scatter_instance,
                         relative=True, componentSpace=True)
+
+    def deleteLastScatter(self):
+        for eachSel in self.LastScatterGroup:
+            cmds.select(eachSel)
+            cmds.delete(eachSel)
+
 
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")"""
     """scene_file = SceneFile("D:/sandbox/tank_model_v001.ma")
