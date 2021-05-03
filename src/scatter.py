@@ -317,6 +317,7 @@ class ScatterScene:
         self.scalerandomnumber3 = .5
         self.rotationNumbermin = 3
         self.rotationNumbermax = 5
+        
         self.vertexesToTarget = cmds.ls(self.objecttoTarget+".vtx[*]", flatten=True)
         self.randomVertexes = 100
         self.NormalChecker1 = False;
